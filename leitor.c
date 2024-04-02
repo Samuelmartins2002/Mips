@@ -32,6 +32,7 @@ void leitor(){
 void tipo_inst(char *dados){
         inf.instrucao=dados;
         char vet[4];
+        vet[3]='\0';
         char r[]="010",i[]="001",j[]="000";
         for(int i=0;i<3;i++){
                 vet[i]=inf.instrucao[i];
