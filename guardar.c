@@ -30,7 +30,7 @@ void  leitor(){
         FILE *instrucao1;
         instrucao1 = fopen("instrucoes.txt", "rt");
         while(fgets(vet,17,instrucao1)!=NULL){
-                inf.instrucao[k]=vet;
+                strcpy(inf.instrucao[k],vet);
 		k++;
         }
 	fclose(instrucao1);
