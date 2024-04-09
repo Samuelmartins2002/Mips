@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef enum {
+    TIPO_I,
+    TIPO_J,
+    TIPO_R,
+    TIPO_OUTROS
+} classe_int;
+
+typedef struct
+{
+    classe_int classes;
+    char inst_char[17];
+    char opcode[5];
+    char rs[4];
+    char rt[4];
+    char rd[4];
+    char funct[4];
+    char imm[17];
+    char addr[17];
+} instrucao;
+
+int binario_decimal(char *binarioString);
+
+int main(void){
+    FILE *inputFile;
+    char line[17];
+    instrucao instr;
+
+    // Abrir o arquivo de entrada
+    inputFile = fopen("input.txt", "r");
+    if (inputFile == NULL) {
+        perror("Erro ao abrir arquivo");
+        return EXIT_FAILURE;
+    }
+
+    // Ler cada linha do arquivo
+    while (fgets(line, sizeof(line), inputFile) != NULL) {
+        
+        line[strcspn(line, "\n")] = '\0';
+
+        
+        strncpy(instr.inst_char, line, 17);
+        instr.inst_char[16] = '\0';
+        strncpy(instr.opcode, line, 4);
+        instr.opcode[4] = '\0';
+        strncpy(instr.rs, line + 4, 3);
+        instr.rs[3] = '\0';
+        strncpy(instr.rt, line + 7, 3);
+        instr.rt[3] = '\0';
+        strncpy(instr.rd, line + 10, 3);
+        instr.rd[3] = '\0';
+        strncpy(instr.funct, line + 13, 3);
+        instr.funct[3] = '\0';
+        strncpy(instr.imm, line + 4, 16);
+        instr.imm[16] = '\0';
+        strncpy(instr.addr, line + 1, 16);
+        instr.addr[16] = '\0';
+
+        // Convertendo os campos binários para decimais
+        printf("Opcode: %d\n", binario_decimal(instr.opcode));
+        printf("RS: %d\n", binario_decimal(instr.rs));
+        printf("RT: %d\n", binario_decimal(instr.rt));
+        printf("RD: %d\n", binario_decimal(instr.rd));
+        printf("Funct: %d\n", binario_decimal(instr.funct));
+        printf("Immediate: %d\n", binario_decimal(instr.imm));
+        printf("Address: %d\n", binario_decimal(instr.addr));
+    }
+
+    // Fechar o arquivo de entrada
+    fclose(inputFile);
+
+    return 0;
+}
+
+int binario_decimal(char *binarioString){
+    int decimal = 0;
+    int len = strlen(binarioString);
+    for (int i = 0; i < len; i++) {
+        if (binarioString[i] == '1') {
+            decimal += (1 << (len - i - 1));
+        }
+    }
+    return decimal;
+}
