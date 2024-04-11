@@ -199,7 +199,6 @@ void DadosRegistrador(char **registradores, char *dados, char *end, int chose, c
 void pc(Memoria *mem, int *count,char **registrador){
   decodificarOpcode(mem, count);
   UC(mem, count, registrador);
-  printf("sei la 2\n");
   if(mem[*count].instrucao[0] == '\0'){
     return;
   }
