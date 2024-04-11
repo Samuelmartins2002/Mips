@@ -131,27 +131,27 @@ void ula(char *funct, char *valor, char *valor1, char *output, int *count){
 			dec_bi(output,x-y,count);
 			break;
 		case and:
-		for(int j=0;j<8;j++){
-        		if(valor[j]==valor1[j] && valor[j]=='1'){
-	        		output[j]='1';
+			for(int j=0;j<8;j++){
+        			if(valor[j]==valor1[j] && valor[j]=='1'){
+	        			output[j]='1';
+			}
+        			else{
+        				output[j]='0';
+				}
+			}
+      			break;
+      		case or:
+			for(int j=0;j<8;j++){
+  				if(valor[j]=='1' || valor1[j]=='1'){
+          				output[j]='1';
+ 				}
+  				else{
+          				output[j]='0';
+  				}
+			}
+			break;
+		}
 	}
-        else{
-        	output[j]='0';
-	}
-	}
-      break;
-      case or:
-for(int j=0;j<8;j++){
-  if(valor[j]=='1' || valor1[j]=='1'){
-          output[j]='1';
- }
-  else{
-          output[j]='0';
-  }
-}
-break;
-}
-}
 
 void tipo_R(Memoria *mem, int *count){
 	for(int i=0;i<3;i++){
