@@ -52,7 +52,6 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
 }
 
 int bi_dec(char *mem){
-  printf("oi");
 	int i=strlen(mem);
 	int value,deci=0,k=0;
 	for(int j=i;j>0;j--){
@@ -187,10 +186,7 @@ void iniciarRegistrador(char **registrador){
 }
 
 void DadosRegistrador(char **registradores, char *dados, char *end, int chose, char *des){
-  printf("teste");
-  printf("%c",end[0]);
   int k=bi_dec(end);
-  printf("%i",k);
   switch(chose){
     case 0:
       strcpy(registradores[k],dados);
@@ -215,7 +211,6 @@ void pc(Memoria *mem, int *count,char **registrador){
 }
 
 void UC(Memoria *mem, int *count, char **registrador){
- printf("inicio do sonho\n");
  int k=bi_dec(mem[*count].opcode);
  char *value;
  value=(char*)malloc(17*sizeof(char));
@@ -230,20 +225,19 @@ for(int i=0;i<16;i++){
   value[i]='0';
   value1[i]='0';
 }
-  printf("até aqui tudo bem\n");
+
   switch(k){
-   case 0:
+ case 0:
       DadosRegistrador(registrador, null1, mem[*count].rs, 1, value);
       DadosRegistrador(registrador, null1, mem[*count].rt, 1, value1);
       ula(mem[*count].funct, value,value1,output,count);
       DadosRegistrador(registrador, output, mem[*count].rd, 0, null1);
       break;
   case 4:
-      printf("aqui é a cagada\n");
-      DadosRegistrador(registrador, null1, mem[*count].rs, 1, value); //achou
-      printf("ta quente\n");
+      DadosRegistrador(registrador, null1, mem[*count].rs, 1, value);
       ula(null1, value, mem[*count].imm, output, count);
       DadosRegistrador(registrador, output, mem[*count].rd, 0, null1);
+      break;
  }
 }
 
