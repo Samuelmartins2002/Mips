@@ -1,87 +1,222 @@
+#ifndef __MIPS__
+#define __MIPS__
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+#include <math.h>
 
-typedef enum {
-    TIPO_I,
-    TIPO_J,
-    TIPO_R,
-    TIPO_OUTROS
-} classe_int;
+enum comando{add=0,sub=2,or=4,and=5};
 
-typedef struct
-{
-    classe_int classes;
-    char inst_char[17];
-    char opcode[5];
-    char rs[4];
-    char rt[4];
-    char rd[4];
-    char funct[4];
-    char imm[17];
-    char addr[17];
-} instrucao;
+typedef struct {
+    char instrucao[17];
+    int opcode;
+    int funct;
+    int rs;
+    int rt;
+    int rd;
+    int addr;
+    int imm;
+} Memoria;
 
-int binario_decimal(char *binarioString);
+void UC(Memoria *mem, int *count, int *registrador);
+void tipo_R(Memoria *mem, int *count);
+void tipo_I(Memoria *mem, int *count);
+void tipo_J(Memoria *mem, int *count);
+void dec_bi(char *output, int k, int *count);
+int bi_dec(char *mem);
+void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count);
+void decodificarOpcode(Memoria *mem, int *count);
 
-int main(void){
-    FILE *inputFile;
-    char line[17];
-    instrucao instr;
+void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
+    char op[5];
+    FILE *arquivo;
+    arquivo = fopen(nomeArquivo, "r");
 
-    // Abrir o arquivo de entrada
-    inputFile = fopen("input.txt", "r");
-    if (inputFile == NULL) {
-        perror("Erro ao abrir arquivo");
-        return EXIT_FAILURE;
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
     }
 
-    // Ler cada linha do arquivo
-    while (fgets(line, sizeof(line), inputFile) != NULL) {
-        
-        line[strcspn(line, "\n")] = '\0';
+    while (fscanf(arquivo, "%16s", mem[*count].instrucao) != EOF && *count < 100) {
 
-        
-        strncpy(instr.inst_char, line, 17);
-        instr.inst_char[16] = '\0';
-        strncpy(instr.opcode, line, 4);
-        instr.opcode[4] = '\0';
-        strncpy(instr.rs, line + 4, 3);
-        instr.rs[3] = '\0';
-        strncpy(instr.rt, line + 7, 3);
-        instr.rt[3] = '\0';
-        strncpy(instr.rd, line + 10, 3);
-        instr.rd[3] = '\0';
-        strncpy(instr.funct, line + 13, 3);
-        instr.funct[3] = '\0';
-        strncpy(instr.imm, line + 4, 16);
-        instr.imm[16] = '\0';
-        strncpy(instr.addr, line + 1, 16);
-        instr.addr[16] = '\0';
-
-        // Convertendo os campos binários para decimais
-        printf("Opcode: %d\n", binario_decimal(instr.opcode));
-        printf("RS: %d\n", binario_decimal(instr.rs));
-        printf("RT: %d\n", binario_decimal(instr.rt));
-        printf("RD: %d\n", binario_decimal(instr.rd));
-        printf("Funct: %d\n", binario_decimal(instr.funct));
-        printf("Immediate: %d\n", binario_decimal(instr.imm));
-        printf("Address: %d\n", binario_decimal(instr.addr));
+        strncpy(op, mem[*count].instrucao, 4);
+        mem[*count].opcode=bi_dec(op);
+        (*count)++;
+        decodificarOpcode(mem, count);
     }
 
-    // Fechar o arquivo de entrada
-    fclose(inputFile);
-
-    return 0;
+    fclose(arquivo);
+    for (int i = 0; i < *count; i++) {
+       printf("%s\n", mem[i].instrucao);
+   }
+  *count=0;
 }
 
-int binario_decimal(char *binarioString){
-    int decimal = 0;
-    int len = strlen(binarioString);
-    for (int i = 0; i < len; i++) {
-        if (binarioString[i] == '1') {
-            decimal += (1 << (len - i - 1));
+int bi_dec(char *mem){
+  int i=strlen(mem);
+  int value,deci=0,k=0;
+  for(int j=i;j>0;j--){
+    if(mem[j-1]=='0'){
+      value=0;
+    }
+    else{
+      value=1;
+    }
+  deci=deci+value*(pow(2,k));
+  k++;
+  }
+  return(deci);
+}
+
+void dec_bi(char *output, int k, int *count){
+  int t=0;
+  for(int i=0;i<8;i++){
+    output[i]='0';
+  }
+  while(k!=0){
+    if(k%2==1){
+      output[8-t]='1';
+    }
+    else{
+      output[8-t]='1';
+    }
+    t++;
+    k=k/2;
+  }
+}
+
+void decodificarOpcode(Memoria *mem, int *count) {
+  switch(mem[*count].opcode){
+    case 0:
+      printf("Tipo R\n");
+      tipo_R(mem, count);
+      break;
+    case 4:
+      printf("Tipo I addi\n");
+      tipo_I(mem, count);
+      break;
+    case 11:
+      printf("Tipo I lw\n");
+      tipo_I(mem, count);
+      break;
+    case 15:
+      printf("Tipo I sw\n");
+      tipo_I(mem, count);
+      break;
+    case 8:
+      printf("Tipo I beq\n");
+      tipo_I(mem, count);
+      break;
+    case 2:
+      printf("Tipo J\n");
+      tipo_J(mem, count);
+      break;
+    default:
+      printf("Instrução inválida\n");
+      break;
+  }
+}
+
+void ula(int *funct, int *valor, int *valor1, int *output, int *count){
+  enum comando{add=0,sub=2,or=4,and=5};
+  enum comando n=funct;
+  switch(n){
+    case add:
+       *output=*valor+*valor1;
+      break;
+    case sub:
+       *output=*valor-*valor1;
+      break;
+    case and:
+      *output=*valor & *valor1;
+            break;
+    case or:
+      *output= *valor | *valor1;
+      break;
+    }
+  }
+
+void tipo_R(Memoria *mem, int *count){
+  char rs[4],rt[4],rd[4],funct[4];
+  for(int i=0;i<3;i++){
+    rs[i]=mem[*count].instrucao[i+4];
+    rt[i]=mem[*count].instrucao[i+7];
+    rd[i]=mem[*count].instrucao[i+10];
+    funct[i]=mem[*count].instrucao[i+13];
+  }
+  mem[*count].rs=bi_dec(rs);
+  mem[*count].rt=bi_dec(rt);
+  mem[*count].rd=bi_dec(rd);
+  mem[*count].funct=bi_dec(funct);
+}
+
+void tipo_I(Memoria *mem, int *count){
+  char rs[4],rt[4],imm[7];
+        for(int i=0;i<3;i++){
+                rs[i]=mem[*count].instrucao[i+4];
+                rt[i]=mem[*count].instrucao[i+7];
         }
-    }
-    return decimal;
+        for(int i=0;i<6;i++){
+                imm[i]=mem[*count].instrucao[i+10];
+        }
+  mem[*count].rs=bi_dec(rs);
+  mem[*count].rt=bi_dec(rt);
+  mem[*count].imm=bi_dec(imm);
+
 }
+
+void tipo_J(Memoria *mem, int *count){
+  char addr[8];
+  for(int i=0;i<7;i++){
+        addr[i]=mem[*count].instrucao[i+9];
+        }
+  mem[*count].addr=bi_dec(addr);
+}
+
+void DadosRegistrador(int *registradores, int *des, int end,int dados, int chose){
+  switch(chose){
+    case 0:
+      registradores[end]=dados;
+      break;
+    case 1:
+      des=registradores[end];
+      break;
+  }
+}
+
+void pc(Memoria *mem, int *count,int *registrador){
+  /*decodificarOpcode(mem, count);*/
+  UC(mem, count, registrador);
+  if(mem[*count].instrucao[0] == '\0'){
+    return;
+  }
+  else{
+    UC(mem, count,registrador);
+    pc(mem,count+1,registrador);
+  }
+}
+
+void UC(Memoria *mem, int *count, int *registrador){
+ int k=mem[*count].opcode;
+  int null=0;
+  int *valor=(int*)malloc(sizeof(int));
+  int *valor1=(int*)malloc(sizeof(int));
+  int *output=(int*)malloc(sizeof(int));
+
+  switch(k){
+ case 0:
+      DadosRegistrador(registrador, valor, mem[*count].rs, null, 1);
+      DadosRegistrador(registrador, valor1, mem[*count].rt, null, 1);
+      ula(mem[*count].funct, valor, valor1 ,output, count);
+      DadosRegistrador(registrador, null, mem[*count].rd, output, 0);
+      break;
+  case 4:
+      DadosRegistrador(registrador, valor, mem[*count].rs, null, 1);
+      ula(null, valor, mem[*count].imm, output, count);
+      DadosRegistrador(registrador, null, mem[*count].rd, output, 0);
+      break;
+ }
+}
+
+#endif
