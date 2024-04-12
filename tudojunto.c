@@ -1,6 +1,3 @@
-#ifndef __MIPS__
-#define __MIPS__
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -56,8 +53,8 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
 
         strncpy(op, mem[*count].instrucao, 4);
         mem[*count].opcode=bi_dec(op);
-        (*count)++;
         decodificarOpcode(mem, count);
+        (*count)++;
     }
 
     fclose(arquivo);
@@ -200,7 +197,6 @@ void DadosRegistrador(int *registradores, int *des, int end,int dados, int chose
 }
 
 void pc(Memoria *mem, int *count,int *registrador){
-  decodificarOpcode(mem, count);
   UC(mem, count, registrador);
   if(mem[*count].instrucao[0] == '\0'){
     return;
@@ -233,4 +229,4 @@ void UC(Memoria *mem, int *count, int *registrador){
  }
 }
 
-#endif
+
