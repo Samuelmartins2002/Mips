@@ -6,11 +6,13 @@
 int main(){
     Memoria mem[256];
     int *count = malloc(sizeof(int));
-    char **registrador;
+    char *registrador=malloc(sizeof(int));
+  
+
     *count = 0;
 
     carregarMemoria("instrucoes.txt", mem, count);
+    
     pc(mem, count, registrador);
 
-    return 0;
   }
