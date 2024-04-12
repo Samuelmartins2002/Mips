@@ -16,6 +16,7 @@ typedef struct {
     int imm;
 } Memoria;
 
+void pc(Memoria *mem, int *count,int *registrador);
 void UC(Memoria *mem, int *count, int *registrador);
 void tipo_R(Memoria *mem, int *count);
 void tipo_I(Memoria *mem, int *count);
@@ -28,7 +29,7 @@ void decodificarOpcode(Memoria *mem, int *count);
 int main(){
     Memoria mem[256];
     int *count = malloc(sizeof(int));
-    char *registrador=malloc(sizeof(int));
+    int *registrador=malloc(sizeof(int));
 
 
     *count = 0;
@@ -129,21 +130,21 @@ void decodificarOpcode(Memoria *mem, int *count) {
   }
 }
 
-void ula(int *funct, int *valor, int *valor1, int *output, int *count){
+void ula(int funct, int valor, int valor1, int *output, int *count){
   enum comando{add=0,sub=2,or=4,and=5};
   enum comando n=funct;
   switch(n){
     case add:
-       *output=*valor+*valor1;
+       *output=valor+valor1;
       break;
     case sub:
-       *output=*valor-*valor1;
+       *output=valor-valor1;
       break;
     case and:
-      *output=*valor & *valor1;
+      *output=valor & valor1;
             break;
     case or:
-      *output= *valor | *valor1;
+      *output= valor | valor1;
       break;
     }
   }
@@ -185,13 +186,13 @@ void tipo_J(Memoria *mem, int *count){
   mem[*count].addr=bi_dec(addr);
 }
 
-void DadosRegistrador(int *registradores, int *des, int end,int dados, int chose){
+void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose){
   switch(chose){
     case 0:
       registradores[end]=dados;
       break;
     case 1:
-      des=registradores[end];
+      *output=registradores[end];
       break;
   }
 }
@@ -209,24 +210,23 @@ void pc(Memoria *mem, int *count,int *registrador){
 
 void UC(Memoria *mem, int *count, int *registrador){
  int k=mem[*count].opcode;
-  int null=0;
-  int *valor=(int*)malloc(sizeof(int));
-  int *valor1=(int*)malloc(sizeof(int));
+  int *null=malloc(sizeof(int));
+  int *valor=malloc(sizeof(int));
+  int *valor1=malloc(sizeof(int));
   int *output=(int*)malloc(sizeof(int));
 
   switch(k){
  case 0:
-      DadosRegistrador(registrador, valor, mem[*count].rs, null, 1);
-      DadosRegistrador(registrador, valor1, mem[*count].rt, null, 1);
-      ula(mem[*count].funct, valor, valor1 ,output, count);
-      DadosRegistrador(registrador, null, mem[*count].rd, output, 0);
+      DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
+      DadosRegistrador(registrador, *null, mem[*count].rt, valor1, 1);
+      ula(mem[*count].funct, *valor, *valor1 ,output, count);
+      DadosRegistrador(registrador, *output, mem[*count].rd, null, 0);
       break;
   case 4:
-      DadosRegistrador(registrador, valor, mem[*count].rs, null, 1);
-      ula(null, valor, mem[*count].imm, output, count);
-      DadosRegistrador(registrador, null, mem[*count].rd, output, 0);
+      DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
+      ula(*null, *valor, mem[*count].imm, output, count);
+      DadosRegistrador(registrador, *output, mem[*count].rd, null, 0);
       break;
  }
 }
-
 
