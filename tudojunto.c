@@ -16,6 +16,8 @@ typedef struct {
     int imm;
 } Memoria;
 
+void iniciarReg(int *registrador);
+void verReg(int *registrador);
 void pc(Memoria *mem, int *count,int *registrador);
 void UC(Memoria *mem, int *count, int *registrador);
 void tipo_R(Memoria *mem, int *count);
@@ -29,7 +31,9 @@ void decodificarOpcode(Memoria *mem, int *count);
 int main(){
     Memoria mem[256];
     int *count = malloc(sizeof(int));
-    int *registrador=malloc(sizeof(int));
+    int *registrador=malloc(8*sizeof(int));
+  iniciarReg(registrador);
+  verReg(registrador);
 
 
     *count = 0;
@@ -37,6 +41,7 @@ int main(){
     carregarMemoria("instrucoes.txt", mem, count);
 
     pc(mem, count, registrador);
+  verReg(registrador);
 
   }
 
@@ -50,7 +55,7 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
         return;
     }
 
-    while (fscanf(arquivo, "%16s", mem[*count].instrucao) != EOF && *count < 100) {
+    while (fscanf(arquivo, "%16s", mem[*count].instrucao) != EOF && *count < 6) {
 
         strncpy(op, mem[*count].instrucao, 4);
         mem[*count].opcode=bi_dec(op);
@@ -60,7 +65,14 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
 
     fclose(arquivo);
     for (int i = 0; i < *count; i++) {
-       printf("%s\n", mem[i].instrucao);
+       printf("\n %s\n", mem[i].instrucao);
+       printf("rt %i\n", mem[i].rt);
+      printf("rd %i\n", mem[i].rd);
+      printf("rs %i\n", mem[i].rs);
+        printf("imm %i\n", mem[i].imm);
+        printf("funct %i\n", mem[i].funct);
+        printf("addr %i\n", mem[i].addr);
+        printf("op %i\n", mem[i].opcode);
    }
   *count=0;
 }
@@ -83,9 +95,6 @@ int bi_dec(char *mem){
 
 void dec_bi(char *output, int k, int *count){
   int t=0;
-  for(int i=0;i<8;i++){
-    output[i]='0';
-  }
   while(k!=0){
     if(k%2==1){
       output[8-t]='1';
@@ -101,27 +110,27 @@ void dec_bi(char *output, int k, int *count){
 void decodificarOpcode(Memoria *mem, int *count) {
   switch(mem[*count].opcode){
     case 0:
-      printf("Tipo R\n");
+      printf("\n Tipo R %s \n", mem[*count].instrucao);
       tipo_R(mem, count);
       break;
     case 4:
-      printf("Tipo I addi\n");
+      printf("\n Tipo I addi %s \n",mem[*count].instrucao);
       tipo_I(mem, count);
       break;
     case 11:
-      printf("Tipo I lw\n");
+      printf("\n Tipo I lw %s \n",mem[*count].instrucao );
       tipo_I(mem, count);
       break;
     case 15: 
-      printf("Tipo I sw\n");
+      printf("\n Tipo I sw %s \n",mem[*count].instrucao );
       tipo_I(mem, count);
       break;
     case 8:
-      printf("Tipo I beq\n");
+      printf("\n Tipo I beq %s \n",mem[*count].instrucao );
       tipo_I(mem, count);
       break;
     case 2:
-      printf("Tipo J\n");
+      printf("\n Tipo J %s \n", mem[*count].instrucao);
       tipo_J(mem, count);
       break;
     default:
@@ -151,16 +160,23 @@ void ula(int funct, int valor, int valor1, int *output, int *count){
 
 void tipo_R(Memoria *mem, int *count){
   char rs[4],rt[4],rd[4],funct[4];
+  
   for(int i=0;i<3;i++){
     rs[i]=mem[*count].instrucao[i+4];
     rt[i]=mem[*count].instrucao[i+7]; 
     rd[i]=mem[*count].instrucao[i+10];
-    funct[i]=mem[*count].instrucao[i+13]; 
+  funct[i]=mem[*count].instrucao[i+13]; 
   }
+  rs[3] = '\0';
+    rt[3] = '\0';
+    rd[3] = '\0';
+    funct[3] = '\0';
   mem[*count].rs=bi_dec(rs);
   mem[*count].rt=bi_dec(rt);
   mem[*count].rd=bi_dec(rd);
   mem[*count].funct=bi_dec(funct);
+
+
 }
 
 void tipo_I(Memoria *mem, int *count){
@@ -169,13 +185,17 @@ void tipo_I(Memoria *mem, int *count){
                 rs[i]=mem[*count].instrucao[i+4];
                 rt[i]=mem[*count].instrucao[i+7]; 
         }
+  rs[3] = '\0';
+    rt[3] = '\0';
+    imm[7] = '\0';
+    
         for(int i=0;i<6;i++){
                 imm[i]=mem[*count].instrucao[i+10];
         }
   mem[*count].rs=bi_dec(rs);
   mem[*count].rt=bi_dec(rt);
   mem[*count].imm=bi_dec(imm);
-
+  
 }
 
 void tipo_J(Memoria *mem, int *count){
@@ -183,7 +203,10 @@ void tipo_J(Memoria *mem, int *count){
   for(int i=0;i<7;i++){ 
         addr[i]=mem[*count].instrucao[i+9];
         }
+addr[8]='\0';
   mem[*count].addr=bi_dec(addr);
+  
+
 }
 
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose){
@@ -198,7 +221,6 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
 }
 
 void pc(Memoria *mem, int *count,int *registrador){
-  UC(mem, count, registrador);
   if(mem[*count].instrucao[0] == '\0'){
     return;
   }
@@ -214,7 +236,6 @@ void UC(Memoria *mem, int *count, int *registrador){
   int *valor=malloc(sizeof(int));
   int *valor1=malloc(sizeof(int));
   int *output=(int*)malloc(sizeof(int));
-
   switch(k){
  case 0:
       DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
@@ -230,3 +251,14 @@ void UC(Memoria *mem, int *count, int *registrador){
  }
 }
 
+void verReg(int *registrador){
+  for(int i=0;i<8;i++){
+  printf("Registrador %i: %i \n",i, registrador[i]);
+    }
+}
+
+void iniciarReg(int *registrador){
+  for(int i=0;i<8;i++){
+  registrador[i]=0;
+    }
+}
