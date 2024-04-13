@@ -187,7 +187,7 @@ void tipo_I(Memoria *mem, int *count){
         }
   rs[3] = '\0';
     rt[3] = '\0';
-    imm[7] = '\0';
+    imm[6] = '\0';
     
         for(int i=0;i<6;i++){
                 imm[i]=mem[*count].instrucao[i+10];
@@ -203,7 +203,7 @@ void tipo_J(Memoria *mem, int *count){
   for(int i=0;i<7;i++){ 
         addr[i]=mem[*count].instrucao[i+9];
         }
-addr[8]='\0';
+addr[7]='\0';
   mem[*count].addr=bi_dec(addr);
   
 
