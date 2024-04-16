@@ -28,6 +28,7 @@ int bi_dec(char *mem);
 void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count);
 void decodificarOpcode(Memoria *mem, int *count);
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose);
+void verinstrucoes(Memoria *mem, int *count);
 
 int main(){
   Memoria mem[256];
@@ -38,7 +39,7 @@ int main(){
   *count = 0;
   carregarMemoria("instrucoes.txt", mem, count);
   while(k!=0){
-    printf("\n1-Executar todo o arquivo\n2-Executar uma linha\n3-Ver Registradores\n4-Sair\n");
+    printf("\n1-Executar todo o arquivo\n2-Executar uma linha\n3-Ver Registradores\n4-Ver instruçoes\n5-Sair\n");
     scanf("%i",&k);
     switch(k){
       case 1:
@@ -52,6 +53,8 @@ int main(){
         verReg(registrador);
         break;
       case 4:
+        verinstrucoes(mem,count);
+      case 5:
         k=0;
         break;
     }
@@ -75,17 +78,7 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
       (*count)++;
     }
 
-    fclose(arquivo);
-    for (int i = 0; i < *count; i++) {
-      printf("\n %s\n", mem[i].instrucao);
-      printf("RT: %i\n", mem[i].rt);
-      printf("RD: %i\n", mem[i].rd);
-      printf("RS: %i\n", mem[i].rs);
-      printf("imm %i\n", mem[i].imm);
-      printf("funct %i\n", mem[i].funct);
-      printf("addr %i\n", mem[i].addr);
-      printf("op %i\n", mem[i].opcode);
-    }
+  fclose(arquivo);
   *count=0;
 }
 
@@ -108,31 +101,22 @@ int bi_dec(char *mem){
 void decodificarOpcode(Memoria *mem, int *count) {
   switch(mem[*count].opcode){
     case 0:
-      printf("\n Tipo R %s \n", mem[*count].instrucao);
       tipo_R(mem, count);
       break;
     case 4:
-      printf("\n Tipo I addi %s \n",mem[*count].instrucao);
       tipo_I(mem, count);
       break;
     case 11:
-      printf("\n Tipo I lw %s \n",mem[*count].instrucao );
       tipo_I(mem, count);
       break;
     case 15: 
-      printf("\n Tipo I sw %s \n",mem[*count].instrucao );
       tipo_I(mem, count);
       break;
     case 8:
-      printf("\n Tipo I beq %s \n",mem[*count].instrucao );
       tipo_I(mem, count);
       break;
     case 2:
-      printf("\n Tipo J %s \n", mem[*count].instrucao);
       tipo_J(mem, count);
-      break;
-    default:
-      printf("Instrução inválida\n");
       break;
   }
 }
@@ -242,6 +226,14 @@ void UC(Memoria *mem, int *count, int *registrador){
       ula(*null, *valor, mem[*count].imm, output, count);
       DadosRegistrador(registrador, *output, mem[*count].rt, null, 0);
       break;
+    case 2:
+      (*count)=mem[*count].addr*2-1;
+      break;
+    case 8:
+      if(mem[*count].rs==mem[*count].rt){
+         (*count)=(*count)+mem[*count].imm*2-1;
+      }
+      break;
   }
 }
 
@@ -257,3 +249,17 @@ void iniciarReg(int *registrador){
   }
 }
 
+void verinstrucoes(Memoria *mem, int *count){
+  int i=0;
+  while(strlen(mem[*count].instrucao) != 0){
+    i++;
+    printf("\n %s\n", mem[i].instrucao);
+    printf("RT: %i\n", mem[i].rt);
+    printf("RD: %i\n", mem[i].rd);
+    printf("RS: %i\n", mem[i].rs);
+    printf("imm %i\n", mem[i].imm);
+    printf("funct %i\n", mem[i].funct);
+    printf("addr %i\n", mem[i].addr);
+    printf("op %i\n", mem[i].opcode);
+  }
+}
