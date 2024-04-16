@@ -27,23 +27,36 @@ void dec_bi(char *output, int k, int *count);
 int bi_dec(char *mem);
 void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count);
 void decodificarOpcode(Memoria *mem, int *count);
+void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose);
 
 int main(){
-    Memoria mem[256];
-    int *count = malloc(sizeof(int));
-    int *registrador=malloc(8*sizeof(int));
+  Memoria mem[256];
+  int *count = malloc(sizeof(int));
+  int *registrador=malloc(8*sizeof(int));
   iniciarReg(registrador);
-  verReg(registrador);
-
-
-    *count = 0;
-
-    carregarMemoria("instrucoes.txt", mem, count);
-
-    pc(mem, count, registrador);
-  verReg(registrador);
-
+  int k=1;
+  *count = 0;
+  carregarMemoria("instrucoes.txt", mem, count);
+  while(k!=0){
+    printf("\n1-Executar todo o arquivo\n2-Executar uma linha\n3-Ver Registradores\n4-Sair\n");
+    scanf("%i",&k);
+    switch(k){
+      case 1:
+        pc(mem, count, registrador);
+        break;
+      case 2:
+        UC(mem, count, registrador);
+        (*count)++;  
+        break;
+      case 3:
+        verReg(registrador);
+        break;
+      case 4:
+        k=0;
+        break;
+    }
   }
+}
 
 void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
     char op[5];
@@ -51,29 +64,28 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
     arquivo = fopen(nomeArquivo, "r");
 
     if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
-        return;
+      printf("Erro ao abrir o arquivo.\n");
+      return;
     }
 
-    while (fscanf(arquivo, "%16s", mem[*count].instrucao) != EOF && *count < 6) {
-
-        strncpy(op, mem[*count].instrucao, 4);
-        mem[*count].opcode=bi_dec(op);
-        decodificarOpcode(mem, count);
-        (*count)++;
+    while (fscanf(arquivo, "%16s", mem[*count].instrucao) != EOF && *count < 256) {
+      strncpy(op, mem[*count].instrucao, 4);
+      mem[*count].opcode=bi_dec(op);
+      decodificarOpcode(mem, count);
+      (*count)++;
     }
 
     fclose(arquivo);
     for (int i = 0; i < *count; i++) {
-       printf("\n %s\n", mem[i].instrucao);
-       printf("rt %i\n", mem[i].rt);
-      printf("rd %i\n", mem[i].rd);
-      printf("rs %i\n", mem[i].rs);
-        printf("imm %i\n", mem[i].imm);
-        printf("funct %i\n", mem[i].funct);
-        printf("addr %i\n", mem[i].addr);
-        printf("op %i\n", mem[i].opcode);
-   }
+      printf("\n %s\n", mem[i].instrucao);
+      printf("RT: %i\n", mem[i].rt);
+      printf("RD: %i\n", mem[i].rd);
+      printf("RS: %i\n", mem[i].rs);
+      printf("imm %i\n", mem[i].imm);
+      printf("funct %i\n", mem[i].funct);
+      printf("addr %i\n", mem[i].addr);
+      printf("op %i\n", mem[i].opcode);
+    }
   *count=0;
 }
 
@@ -91,20 +103,6 @@ int bi_dec(char *mem){
   k++;
   }
   return(deci);
-}
-
-void dec_bi(char *output, int k, int *count){
-  int t=0;
-  while(k!=0){
-    if(k%2==1){
-      output[8-t]='1';
-    }
-    else{
-      output[8-t]='1';	
-    }
-    t++;
-    k=k/2;
-  }
 }
 
 void decodificarOpcode(Memoria *mem, int *count) {
@@ -144,14 +142,14 @@ void ula(int funct, int valor, int valor1, int *output, int *count){
   enum comando n=funct;
   switch(n){
     case add:
-       *output=valor+valor1;
+      *output=valor+valor1;
       break;
     case sub:
-       *output=valor-valor1;
+      *output=valor-valor1;
       break;
     case and:
       *output=valor & valor1;
-            break;
+      break;
     case or:
       *output= valor | valor1;
       break;
@@ -165,48 +163,43 @@ void tipo_R(Memoria *mem, int *count){
     rs[i]=mem[*count].instrucao[i+4];
     rt[i]=mem[*count].instrucao[i+7]; 
     rd[i]=mem[*count].instrucao[i+10];
-  funct[i]=mem[*count].instrucao[i+13]; 
+    funct[i]=mem[*count].instrucao[i+13]; 
   }
   rs[3] = '\0';
-    rt[3] = '\0';
-    rd[3] = '\0';
-    funct[3] = '\0';
+  rt[3] = '\0';
+  rd[3] = '\0';
+  funct[3] = '\0';
   mem[*count].rs=bi_dec(rs);
   mem[*count].rt=bi_dec(rt);
   mem[*count].rd=bi_dec(rd);
   mem[*count].funct=bi_dec(funct);
-
-
 }
 
 void tipo_I(Memoria *mem, int *count){
   char rs[4],rt[4],imm[7];
-        for(int i=0;i<3;i++){
-                rs[i]=mem[*count].instrucao[i+4];
-                rt[i]=mem[*count].instrucao[i+7]; 
-        }
+  for(int i=0;i<3;i++){
+    rs[i]=mem[*count].instrucao[i+4];
+    rt[i]=mem[*count].instrucao[i+7]; 
+  }
   rs[3] = '\0';
-    rt[3] = '\0';
-    imm[6] = '\0';
+  rt[3] = '\0';
+  imm[6] = '\0';
     
-        for(int i=0;i<6;i++){
-                imm[i]=mem[*count].instrucao[i+10];
-        }
+  for(int i=0;i<6;i++){
+    imm[i]=mem[*count].instrucao[i+10];
+  }
   mem[*count].rs=bi_dec(rs);
   mem[*count].rt=bi_dec(rt);
   mem[*count].imm=bi_dec(imm);
-  
 }
 
 void tipo_J(Memoria *mem, int *count){
   char addr[8];    
   for(int i=0;i<7;i++){ 
-        addr[i]=mem[*count].instrucao[i+9];
-        }
-addr[7]='\0';
+    addr[i]=mem[*count].instrucao[i+9];
+  }
+  addr[7]='\0';
   mem[*count].addr=bi_dec(addr);
-  
-
 }
 
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose){
@@ -221,44 +214,46 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
 }
 
 void pc(Memoria *mem, int *count,int *registrador){
-  if(mem[*count].instrucao[0] == '\0'){
+  if(strlen(mem[*count].instrucao) == 0){
     return;
   }
   else{
-    UC(mem, count,registrador);
-    pc(mem,count+1,registrador);
+    UC(mem, count, registrador);
+    (*count)++;
+    pc(mem,count,registrador);
   }
 }
 
 void UC(Memoria *mem, int *count, int *registrador){
- int k=mem[*count].opcode;
+  int k=mem[*count].opcode;
   int *null=malloc(sizeof(int));
   int *valor=malloc(sizeof(int));
   int *valor1=malloc(sizeof(int));
   int *output=(int*)malloc(sizeof(int));
   switch(k){
- case 0:
+    case 0:
       DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
       DadosRegistrador(registrador, *null, mem[*count].rt, valor1, 1);
       ula(mem[*count].funct, *valor, *valor1 ,output, count);
       DadosRegistrador(registrador, *output, mem[*count].rd, null, 0);
       break;
-  case 4:
+    case 4:
       DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
       ula(*null, *valor, mem[*count].imm, output, count);
-      DadosRegistrador(registrador, *output, mem[*count].rd, null, 0);
+      DadosRegistrador(registrador, *output, mem[*count].rt, null, 0);
       break;
- }
+  }
 }
 
 void verReg(int *registrador){
   for(int i=0;i<8;i++){
-  printf("Registrador %i: %i \n",i, registrador[i]);
-    }
+    printf("\nRegistrador %i: %i \n",i, registrador[i]);
+  }
 }
 
 void iniciarReg(int *registrador){
   for(int i=0;i<8;i++){
-  registrador[i]=0;
-    }
+    registrador[i]=0;
+  }
 }
+
