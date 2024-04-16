@@ -39,7 +39,7 @@ int main(){
   *count = 0;
   carregarMemoria("instrucoes.txt", mem, count);
   while(k!=0){
-    printf("\n1-Executar todo o arquivo\n2-Executar uma linha\n3-Ver Registradores\n4-Ver instruçoes\n5-Sair\n");
+    printf("\n1-Executar todo o arquivo\n2-Executar uma linha\n3-Voltar uma instruçao\n4-Ver Registradores\n5-Ver instruçoes\n6-Sair\n");
     scanf("%i",&k);
     switch(k){
       case 1:
@@ -50,11 +50,16 @@ int main(){
         (*count)++;  
         break;
       case 3:
+        (*count)--; 
+        UC(mem, count, registrador);
+        (*count)++; 
+        break; 
+      case 4:
         verReg(registrador);
         break;
-      case 4:
-        verinstrucoes(mem,count);
       case 5:
+        verinstrucoes(mem,count);
+      case 6:
         k=0;
         break;
     }
