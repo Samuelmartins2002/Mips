@@ -16,10 +16,15 @@ typedef struct {
     int imm;
 } Memoria;
 
+typedef struct{
+    int memoria_dados[256];
+}dados;
+
+void inicializarMemoriaDados(dados *memoria2);
 void iniciarReg(int *registrador);
 void verReg(int *registrador);
-void pc(Memoria *mem, int *count,int *registrador);
-void UC(Memoria *mem, int *count, int *registrador);
+void pc(Memoria *mem, int *count,int *registrador, dados *m2);
+void UC(Memoria *mem, int *count, int *registrador, dados *m2);
 void tipo_R(Memoria *mem, int *count);
 void tipo_I(Memoria *mem, int *count);
 void tipo_J(Memoria *mem, int *count);
@@ -31,27 +36,39 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
 void verinstrucoes(Memoria *mem, int *count);
 
 int main(){
+  dados *memoria2=malloc(sizeof(dados));
   Memoria mem[256];
   int *count = malloc(sizeof(int));
   int *registrador=malloc(8*sizeof(int));
   iniciarReg(registrador);
   int k=1;
   *count = 0;
+  inicializarMemoriaDados(memoria2);
   carregarMemoria("instrucoes.txt", mem, count);
   while(k!=0){
-    printf("\n1-Executar todo o arquivo\n2-Executar uma linha\n3-Voltar uma instruçao\n4-Ver Registradores\n5-Ver instruçoes\n6-Sair\n");
+    printf("\n================================\n");
+    printf("             MENU\n");
+    printf("================================\n");
+    printf("1 - (RUN)Executar todo o arquivo\n");
+    printf("2 - (STEP)Executar uma linha\n");
+    printf("3 - (BACK)Voltar uma instrução\n");
+    printf("4 - Ver Registradores\n");
+    printf("5 - Ver instruções\n");
+    printf("6 - Sair\n");
+    printf("================================\n");
+    printf("Selecione: ");
     scanf("%i",&k);
     switch(k){
       case 1:
-        pc(mem, count, registrador);
+        pc(mem, count, registrador,memoria2);
         break;
       case 2:
-        UC(mem, count, registrador);
+        UC(mem, count, registrador,memoria2);
         (*count)++;  
         break;
       case 3:
         (*count)--; 
-        UC(mem, count, registrador);
+        UC(mem, count, registrador,memoria2);
         (*count)++; 
         break; 
       case 4:
@@ -147,7 +164,7 @@ void ula(int funct, int valor, int valor1, int *output, int *count){
 
 void tipo_R(Memoria *mem, int *count){
   char rs[4],rt[4],rd[4],funct[4];
-  
+
   for(int i=0;i<3;i++){
     rs[i]=mem[*count].instrucao[i+4];
     rt[i]=mem[*count].instrucao[i+7]; 
@@ -173,7 +190,7 @@ void tipo_I(Memoria *mem, int *count){
   rs[3] = '\0';
   rt[3] = '\0';
   imm[6] = '\0';
-    
+
   for(int i=0;i<6;i++){
     imm[i]=mem[*count].instrucao[i+10];
   }
@@ -202,18 +219,18 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
   }
 }
 
-void pc(Memoria *mem, int *count,int *registrador){
+void pc(Memoria *mem, int *count,int *registrador, dados *m2){
   if(strlen(mem[*count].instrucao) == 0){
     return;
   }
   else{
-    UC(mem, count, registrador);
+    UC(mem, count, registrador,m2);
     (*count)++;
-    pc(mem,count,registrador);
+    pc(mem,count,registrador,m2);
   }
 }
 
-void UC(Memoria *mem, int *count, int *registrador){
+void UC(Memoria *mem, int *count, int *registrador, dados *m2){
   int k=mem[*count].opcode;
   int *null=malloc(sizeof(int));
   int *valor=malloc(sizeof(int));
@@ -239,6 +256,20 @@ void UC(Memoria *mem, int *count, int *registrador){
          (*count)=(*count)+mem[*count].imm*2-1;
       }
       break;
+    case 15:
+      if ( (mem[*count].imm+mem[*count].rs)>= 0 && (mem[*count].imm+mem[*count].rs) < 256) {
+        m2->memoria_dados[mem[*count].rs+mem[*count].imm]=mem[*count].rt;
+      }
+      else{
+        printf("Endereço inválido.\n");
+      }
+    case 11:
+      if ( (mem[*count].imm+mem[*count].rs)>= 0 && (mem[*count].imm+mem[*count].rs) < 256) {
+        mem[*count].rt=m2->memoria_dados[mem[*count].rs+mem[*count].imm];
+      }
+      else{
+        printf("Endereço inválido.\n");
+      }
   }
 }
 
@@ -268,3 +299,9 @@ void verinstrucoes(Memoria *mem, int *count){
     printf("op %i\n", mem[i].opcode);
   }
 }
+
+void inicializarMemoriaDados(dados *memoria2){
+      for (int i = 0; i < 256; i++) {
+          memoria2->memoria_dados[i] = 0;
+      }
+  }
