@@ -14,13 +14,17 @@ typedef struct {
     int rd;
     int addr;
     int imm;
-    int dados[256];
 } Memoria;
 
+typedef struct{
+    int memoria_dados[256];
+}dados;
+
+void inicializarMemoriaDados(dados *memoria2);
 void iniciarReg(int *registrador);
 void verReg(int *registrador);
-void pc(Memoria *mem, int *count,int *registrador);
-void UC(Memoria *mem, int *count, int *registrador);
+void pc(Memoria *mem, int *count,int *registrador, dados *m2);
+void UC(Memoria *mem, int *count, int *registrador, dados *m2);
 void tipo_R(Memoria *mem, int *count);
 void tipo_I(Memoria *mem, int *count);
 void tipo_J(Memoria *mem, int *count);
@@ -30,17 +34,17 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count);
 void decodificarOpcode(Memoria *mem, int *count);
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose);
 void verinstrucoes(Memoria *mem, int *count);
-void inicializarMemoriaDados(Memoria *mem);
-void storeWord(Memoria *mem, int endereco, int dado);
-int loadWord(Memoria *mem, int endereco);
+void imprimirMemoriaDados(dados *memoria2);
 
 int main(){
+  dados *memoria2=malloc(sizeof(dados));
   Memoria mem[256];
   int *count = malloc(sizeof(int));
   int *registrador=malloc(8*sizeof(int));
   iniciarReg(registrador);
   int k=1;
   *count = 0;
+  inicializarMemoriaDados(memoria2);
   carregarMemoria("instrucoes.txt", mem, count);
   while(k!=0){
     printf("\n================================\n");
@@ -51,21 +55,22 @@ int main(){
     printf("3 - (BACK)Voltar uma instrução\n");
     printf("4 - Ver Registradores\n");
     printf("5 - Ver instruções\n");
-    printf("6 - Sair\n");
+    printf("6 - Ver Dados\n");
+    printf("7 - Sair\n");
     printf("================================\n");
     printf("Selecione: ");
     scanf("%i",&k);
     switch(k){
       case 1:
-        pc(mem, count, registrador);
+        pc(mem, count, registrador,memoria2);
         break;
       case 2:
-        UC(mem, count, registrador);
+        UC(mem, count, registrador,memoria2);
         (*count)++;
         break;
       case 3:
         (*count)--;
-        UC(mem, count, registrador);
+        UC(mem, count, registrador,memoria2);
         (*count)++;
         break;
       case 4:
@@ -73,8 +78,15 @@ int main(){
         break;
       case 5:
         verinstrucoes(mem,count);
+        break;
       case 6:
+        imprimirMemoriaDados(memoria2);
+        break;
+      case 7:
         k=0;
+        break;
+      default:
+        printf("Opção inválida!!!");
         break;
     }
   }
@@ -215,75 +227,59 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
       break;
   }
 }
-void inicializarMemoriaDados(Memoria *mem) {
-    for (int i = 0; i < 256; i++) {
-        mem->dados[i] = 0;
-        // zera todos os dados no inicio
-    }
-}
 
-void pc(Memoria *mem, int *count,int *registrador){
+void pc(Memoria *mem, int *count,int *registrador, dados *m2){
   if(strlen(mem[*count].instrucao) == 0){
     return;
   }
   else{
-    UC(mem, count, registrador);
+    UC(mem, count, registrador,m2);
     (*count)++;
-    pc(mem,count,registrador);
+    pc(mem,count,registrador,m2);
   }
 }
 
-void UC(Memoria *mem, int *count, int *registrador){
-  int k = mem[*count].opcode;
-    int *null = malloc(sizeof(int));
-    int *valor = malloc(sizeof(int));
-    int *valor1 = malloc(sizeof(int));
-    int *output = (int *)malloc(sizeof(int));
-
-    switch (k) {
-        case 0:
-            DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
-            DadosRegistrador(registrador, *null, mem[*count].rt, valor1, 1);
-            ula(mem[*count].funct, *valor, *valor1, output, count);
-            DadosRegistrador(registrador, *output, mem[*count].rd, null, 0);
-            break;
-        case 4:  //sw
-            DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
-            storeWord(mem, *valor, mem[*count].imm);  // Sw +rs +imm
-            break;
-        case 5:  //lw
-            DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
-            int dadoCarregado = loadWord(mem, *valor + mem[*count].imm);  // lw +rs +imm ->rt
-            DadosRegistrador(registrador, dadoCarregado, mem[*count].rt, null, 0);
-            break;
-        case 2:
-            (*count) = mem[*count].addr * 2 - 1;
-            break;
-        case 8:
-            if (mem[*count].rs == mem[*count].rt) {
-                (*count) = (*count) + mem[*count].imm * 2 - 1;
-            }
-            break;
-    }
-
-    free(null);
-    free(valor);
-    free(valor1);
-    free(output);
-}
-void storeWord(Memoria *mem, int endereco, int dado) {
-    if (endereco >= 0 && endereco < 256) {
-        mem->dados[endereco] = dado;
-    }
-}
-
-int loadWord(Memoria *mem, int endereco) {
-    if (endereco >= 0 && endereco < 256) {
-        return mem->dados[endereco];
-    }
-    else{
-      return -1;
-    }
+void UC(Memoria *mem, int *count, int *registrador, dados *m2){
+  int k=mem[*count].opcode;
+  int *null=malloc(sizeof(int));
+  int *valor=malloc(sizeof(int));
+  int *valor1=malloc(sizeof(int));
+  int *output=(int*)malloc(sizeof(int));
+  switch(k){
+    case 0:
+      DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
+      DadosRegistrador(registrador, *null, mem[*count].rt, valor1, 1);
+      ula(mem[*count].funct, *valor, *valor1 ,output, count);
+      DadosRegistrador(registrador, *output, mem[*count].rd, null, 0);
+      break;
+    case 4:
+      DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
+      ula(*null, *valor, mem[*count].imm, output, count);
+      DadosRegistrador(registrador, *output, mem[*count].rt, null, 0);
+      break;
+    case 2:
+      (*count)=mem[*count].addr*2-1;
+      break;
+    case 8:
+      if(mem[*count].rs==mem[*count].rt){
+         (*count)=(*count)+mem[*count].imm*2-1;
+      }
+      break;
+    case 15:
+      if ( (mem[*count].imm+mem[*count].rs)>= 0 && (mem[*count].imm+mem[*count].rs) < 256) {
+        m2->memoria_dados[mem[*count].rs+mem[*count].imm]=mem[*count].rt;
+      }
+      else{
+        printf("Endereço inválido.\n");
+      }
+    case 11:
+      if ( (mem[*count].imm+mem[*count].rs)>= 0 && (mem[*count].imm+mem[*count].rs) < 256) {
+        mem[*count].rt=m2->memoria_dados[mem[*count].rs+mem[*count].imm];
+      }
+      else{
+        printf("Endereço inválido.\n");
+      }
+  }
 }
 
 void verReg(int *registrador){
@@ -311,4 +307,19 @@ void verinstrucoes(Memoria *mem, int *count){
     printf("addr %i\n", mem[i].addr);
     printf("op %i\n", mem[i].opcode);
   }
+}
+
+void inicializarMemoriaDados(dados *memoria2){
+      for (int i = 0; i < 256; i++) {
+          memoria2->memoria_dados[i] = 0;
+      }
+  }
+void imprimirMemoriaDados(dados *memoria2) {
+    printf("\nMemória de Dados:\n");
+    for (int i = 0; i < 256; i += 4) {
+        printf("Endereço %03d: %5d | ", i, memoria2->memoria_dados[i]);
+        printf("Endereço %03d: %5d | ", i + 1, memoria2->memoria_dados[i + 1]);
+        printf("Endereço %03d: %5d | ", i + 2, memoria2->memoria_dados[i + 2]);
+        printf("Endereço %03d: %5d\n", i + 3, memoria2->memoria_dados[i + 3]);
+    }
 }
