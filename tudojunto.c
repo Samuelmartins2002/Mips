@@ -79,6 +79,9 @@ int main(){
       case 6:
         k=0;
         break;
+      default:
+        printf("Opção inválida!!!");
+        break;
     }
   }
 }
