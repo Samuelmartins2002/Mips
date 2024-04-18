@@ -46,6 +46,7 @@ int main(){
   inicializarMemoriaDados(memoria2);
   carregarMemoria("instrucoes.txt", mem, count);
   while(k!=0){
+    printf("PC[i%]", *count);
     printf("\n================================\n");
     printf("             MENU\n");
     printf("================================\n");
