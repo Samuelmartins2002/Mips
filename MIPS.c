@@ -23,20 +23,20 @@ typedef struct{
 void inicializarMemoriaDados(dados *memoria2);
 void iniciarReg(int *registrador);
 void verReg(int *registrador);
-void pc(Memoria *mem, int *count,int *registrador, dados *m2);
 void UC(Memoria *mem, int *count, int *registrador, dados *m2);
 void tipo_R(Memoria *mem, int *count);
 void tipo_I(Memoria *mem, int *count);
 void tipo_J(Memoria *mem, int *count);
 void dec_bi(char *output, int k, int *count);
 int bi_dec(char *mem);
-void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count);
+void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count, int *n_instrucoes);
 void decodificarOpcode(Memoria *mem, int *count);
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose);
-void verinstrucoes(Memoria *mem, int *count);
+void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes);
 void vermemoriadados(dados *memoria2);
 
 int main(){
+  int *n_instrucoes = (int *)malloc(sizeof(int));
   dados *memoria2=malloc(sizeof(dados));
   Memoria mem[256];
   int *count = malloc(sizeof(int));
@@ -44,10 +44,18 @@ int main(){
   iniciarReg(registrador);
   int k=1;
   *count = 0;
+  *n_instrucoes = 0;
   inicializarMemoriaDados(memoria2);
-  carregarMemoria("instrucoes.txt", mem, count);
-  while(k!=0){
-    printf("PC[%i]", *count);
+  int q=0;
+  char *nome=malloc(sizeof(char)*51);
+  printf("Qual o nome do arquivo de instruções? ");
+  fgets(nome, 51, stdin);
+  if (nome[strlen(nome)-1] == '\n'){
+    nome[strlen(nome)-1] = '\0';
+  }
+  carregarMemoria(nome, mem, count, n_instrucoes);
+  while(k!=8){
+    printf("\nPC[%i]", *count);
     printf("\n================================\n");
     printf("             MENU\n");
     printf("================================\n");
@@ -55,15 +63,20 @@ int main(){
     printf("2 - (STEP)Executar uma linha\n");
     printf("3 - (BACK)Voltar uma instrução\n");
     printf("4 - Ver Registradores\n");
-    printf("5 - Ver instruções\n");
-    printf("6 - Ver memória de dados\n");
-    printf("7 - Sair\n");
+    printf("5 - Ver instrução atual\n");
+    printf("6 - Ver todas as instruções\n");
+    printf("7 - Ver memória de dados\n");
+    printf("8 - Sair\n");
     printf("================================\n");
     printf("Selecione: ");
     scanf("%i",&k);
+    getchar();
     switch(k){
       case 1:
-        pc(mem, count, registrador,memoria2);
+        while(*count<*n_instrucoes){
+          UC(mem, count, registrador, memoria2);
+          (*count)++;
+        }
         break;
       case 2:
         UC(mem, count, registrador,memoria2);
@@ -78,13 +91,14 @@ int main(){
         verReg(registrador);
         break;
       case 5:
-        verinstrucoes(mem,count);
+        verinstrucoes(mem,count,0, n_instrucoes);
+        break;
       case 6:
-        vermemoriadados(memoria2);
+        verinstrucoes(mem, count,1, n_instrucoes);
         break;
       case 7:
-	k=0;
-	break;
+        vermemoriadados(memoria2);
+        break;
       default:
         printf("Opção inválida\n");
         break;
@@ -92,7 +106,7 @@ int main(){
   }
 }
 
-void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
+void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count, int *n_instrucoes) {
     char op[5];
     FILE *arquivo;
     arquivo = fopen(nomeArquivo, "r");
@@ -108,7 +122,7 @@ void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count) {
       decodificarOpcode(mem, count);
       (*count)++;
     }
-
+  *n_instrucoes=*count;
   fclose(arquivo);
   *count=0;
 }
@@ -228,17 +242,6 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
   }
 }
 
-void pc(Memoria *mem, int *count,int *registrador, dados *m2){
-  if(strlen(mem[*count].instrucao) == 0){
-    return;
-  }
-  else{
-    UC(mem, count, registrador,m2);
-    (*count)++;
-    pc(mem,count,registrador,m2);
-  }
-}
-
 void UC(Memoria *mem, int *count, int *registrador, dados *m2){
   int k=mem[*count].opcode;
   int *null=malloc(sizeof(int));
@@ -261,18 +264,20 @@ void UC(Memoria *mem, int *count, int *registrador, dados *m2){
       (*count)=mem[*count].addr*2-1;
       break;
     case 8:
-      if(mem[*count].rs==mem[*count].rt){
+      DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
+      DadosRegistrador(registrador, *null, mem[*count].rt, valor1, 1);
+      if(*valor1==*valor){
          (*count)=(*count)+mem[*count].imm*2-1;
       }
       break;
     case 11:
-	*valor=m2->memoria_dados[mem[*count].rs+mem[*count].imm];
-	DadosRegistrador(registrador, *valor, mem[*count].rt, null, 0);
-	break;
+  *valor=m2->memoria_dados[mem[*count].rs+mem[*count].imm];
+  DadosRegistrador(registrador, *valor, mem[*count].rt, null, 0);
+  break;
     case 15:
       if ( (mem[*count].imm+mem[*count].rs) >= 0 && (mem[*count].imm+mem[*count].rs) < 256) {
-	DadosRegistrador(registrador, *null, mem[*count].rt, valor, 1);
-	m2->memoria_dados[mem[*count].rs+mem[*count].imm]=*valor;
+  DadosRegistrador(registrador, *null, mem[*count].rt, valor, 1);
+  m2->memoria_dados[mem[*count].rs+mem[*count].imm]=*valor;
 
 
       }
@@ -294,19 +299,20 @@ void iniciarReg(int *registrador){
   }
 }
 
-void verinstrucoes(Memoria *mem, int *count){
-  int i=0;
-  while(strlen(mem[*count].instrucao) != 0){
-    i++;
-    printf("\n %s\n", mem[i].instrucao);
-    printf("RT: %i\n", mem[i].rt);
-    printf("RD: %i\n", mem[i].rd);
-    printf("RS: %i\n", mem[i].rs);
-    printf("imm %i\n", mem[i].imm);
-    printf("funct %i\n", mem[i].funct);
-    printf("addr %i\n", mem[i].addr);
-    printf("op %i\n", mem[i].opcode);
+void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes){
+  int *count1=malloc(sizeof(int));
+  *count1=0;
+  if(chose==0){
+  printf("\nInstrução [%i]: %s", *count, mem[*count].instrucao);
   }
+  else{
+    if(*count<*n_instrucoes){
+    printf("\nInstrução [%i]: %s", *count, mem[*count].instrucao);
+    *count1=*count+1;
+    verinstrucoes(mem, count1 ,1, n_instrucoes);
+    }
+  }
+  free(count1);
 }
 
 void inicializarMemoriaDados(dados *memoria2){
