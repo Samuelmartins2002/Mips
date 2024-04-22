@@ -372,6 +372,7 @@ void salvarAsm(Memoria *mem, int *count, int *n_instrucoes){
     for (int i = 0; i < *n_instrucoes; i++) {
         switch (mem[i].opcode){
             case 0:
+                //Ainda está sem as outras funções do tipo R
                 tipo_R(mem, &i);
                 fprintf(arquivoSaida, "add $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
                 break;
