@@ -372,10 +372,23 @@ void salvarAsm(Memoria *mem, int *count, int *n_instrucoes){
     for (int i = 0; i < *n_instrucoes; i++) {
         switch (mem[i].opcode){
             case 0:
-                //Ainda está sem as outras funções do tipo R
-                tipo_R(mem, &i);
-                fprintf(arquivoSaida, "add $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
-                break;
+                switch(mem[i].funct){
+                  case add:
+                    fprintf(arquivoSaida, "add $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  case sub:
+                    fprintf(arquivoSaida, "sub $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  case or:
+                    fprintf(arquivoSaida, "or $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  case and:
+                    fprintf(arquivoSaida, "and $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  default:
+                    fprintf(arquivoSaida, "instrucaoinvalida");
+                  break;
+                }
             case 2:
                 fprintf(arquivoSaida, "j %d\n", mem[i].addr);
                 break;
