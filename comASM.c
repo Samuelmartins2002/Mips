@@ -390,7 +390,7 @@ void salvarAsm(Memoria *mem, int *count, int *n_instrucoes){
                   break;
                 }
             case 4:
-                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rs, mem[i].rt, mem[i].addr);
+                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rs, mem[i].rt, mem[i].imm);
             break;
             case 11:
                 fprintf(arquivoSaida, "lw $%d, %d($%d)\n", mem[i].rt, mem[i].imm, mem[i].rs);
