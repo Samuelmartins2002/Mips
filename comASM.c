@@ -361,10 +361,10 @@ void fback(dados *memoria2 , int *registrador, back *reserva, int chose){
 void salvarAsm(Memoria *mem, int *count, int *n_instrucoes){
 
   FILE *arquivoEntrada, *arquivoSaida;
-  arquivoEntrada = fopen("instrucoes.txt", "r");
+  /*arquivoEntrada = fopen("instrucoes.txt", "r");*/
   arquivoSaida = fopen("instrucoes.asm", "w");
 
-  if (arquivoEntrada == NULL || arquivoSaida == NULL){
+  if (arquivoSaida == NULL){
     printf("Erro ao abrir o arquivo.\n");
     return;
   }
@@ -389,25 +389,25 @@ void salvarAsm(Memoria *mem, int *count, int *n_instrucoes){
                     fprintf(arquivoSaida, "instrucaoinvalida");
                   break;
                 }
-            case 2:
-                fprintf(arquivoSaida, "j %d\n", mem[i].addr);
-                break;
             case 4:
-                fprintf(arquivoSaida, "beq $%d, $%d, %d\n", mem[i].rs, mem[i].rt, mem[i].addr);
-                break;
-            case 8:
-                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rt, mem[i].rs, mem[i].imm);
-                break;
+                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rs, mem[i].rt, mem[i].addr);
+            break;
             case 11:
                 fprintf(arquivoSaida, "lw $%d, %d($%d)\n", mem[i].rt, mem[i].imm, mem[i].rs);
                 break;
             case 15:
                 fprintf(arquivoSaida, "sw $%d, %d($%d)\n", mem[i].rt, mem[i].imm, mem[i].rs);
                 break;
+            case 8:
+                fprintf(arquivoSaida, "beq $%d, $%d, %d\n", mem[i].rt, mem[i].rs, mem[i].imm);
+                break;
+            case 2:
+                fprintf(arquivoSaida, "j %d\n", mem[i].addr);
+                break;
             default:
                 break;
     }
   }
-  fclose(arquivoEntrada);
+  /*fclose(arquivoEntrada);*/
   fclose(arquivoSaida);
 }
