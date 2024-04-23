@@ -40,6 +40,7 @@ void decodificarOpcode(Memoria *mem, int *count);
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose);
 void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes);
 void vermemoriadados(dados *memoria2);
+void salvarAsm(Memoria *mem, int *n_instrucoes);
 
 int main(){
   back *reserva=malloc(sizeof(back));
@@ -62,7 +63,7 @@ int main(){
     nome[strlen(nome)-1] = '\0';
   }
   carregarMemoria(nome, mem, count, n_instrucoes);
-  while(k!=8){
+  while(k!=9){
     printf("\n\nPC[%i]", *count);
     printf("\n================================\n");
     printf("             MENU\n");
@@ -74,7 +75,8 @@ int main(){
     printf("5 - Ver instrução atual\n");
     printf("6 - Ver todas as instruções\n");
     printf("7 - Ver memória de dados\n");
-    printf("8 - Sair\n");
+    printf("8 - Salvar .asm\n");
+    printf("9 - Sair\n");
     printf("================================\n");
     printf("Selecione: ");
     scanf("%i",&k);
@@ -107,6 +109,10 @@ int main(){
         vermemoriadados(memoria2);
         break;
       case 8:
+        salvarAsm(mem, n_instrucoes);
+        break;
+      case 9:
+        printf("Programa finalizado\n");
         break;
       default:
         printf("Opção inválida\n");
@@ -350,4 +356,56 @@ void fback(dados *memoria2 , int *registrador, back *reserva, int chose){
       registrador[i]=reserva->registradores[i];
     }
   }
+}
+void salvarAsm(Memoria *mem, int *n_instrucoes){
+
+  FILE *arquivoEntrada, *arquivoSaida;
+  arquivoSaida = fopen("instrucoes.asm", "w");
+
+  if (arquivoSaida == NULL){
+    printf("Erro ao abrir o arquivo.\n");
+    return;
+  }
+
+    for (int i = 0; i < *n_instrucoes; i++) {
+        switch (mem[i].opcode){
+            case 0:
+                switch(mem[i].funct){
+                  case add:
+                    fprintf(arquivoSaida, "add $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  case sub:
+                    fprintf(arquivoSaida, "sub $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  case or:
+                    fprintf(arquivoSaida, "or $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  case and:
+                    fprintf(arquivoSaida, "and $%d, $%d, $%d\n", mem[i].rd, mem[i].rs, mem[i].rt);
+                  break;
+                  default:
+                    fprintf(arquivoSaida, "instrucaoinvalida");
+                  break;
+                }
+            break;
+            case 4:
+                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rs, mem[i].rt, mem[i].imm);
+            break;
+            case 11:
+                fprintf(arquivoSaida, "lw $%d, %d($%d)\n", mem[i].rt, mem[i].imm, mem[i].rs);
+                break;
+            case 15:
+                fprintf(arquivoSaida, "sw $%d, %d($%d)\n", mem[i].rt, mem[i].imm, mem[i].rs);
+                break;
+            case 8:
+                fprintf(arquivoSaida, "beq $%d, $%d, %d\n", mem[i].rt, mem[i].rs, mem[i].imm);
+                break;
+            case 2:
+                fprintf(arquivoSaida, "j %d\n", mem[i].addr);
+                break;
+            default:
+                break;
+    }
+  }
+  fclose(arquivoSaida);
 }
