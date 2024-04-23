@@ -89,8 +89,13 @@ int main(){
         }
         break;
       case 2:
+        if(*count<=*n_instrucoes){
         UC(mem, count, registrador,memoria2, reserva);
         (*count)++;  
+        }
+        else{
+          printf("Todas as instruções foram executadas");
+        }
         break;
       case 3:
         fback(memoria2, registrador, reserva, 1);
