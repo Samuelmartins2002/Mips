@@ -269,6 +269,10 @@ void UC(Memoria *mem, int *count, int *registrador, dados *m2, back *reserva){
   int *valor=malloc(sizeof(int));
   int *valor1=malloc(sizeof(int));
   int *output=(int*)malloc(sizeof(int));
+  *null=0;
+  *valor=0;
+  *valor1=0;
+  *output=0;
   switch(k){
     case 0:
       DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
