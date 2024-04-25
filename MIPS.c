@@ -286,13 +286,13 @@ void UC(Memoria *mem, int *count, int *registrador, dados *m2, back *reserva){
       DadosRegistrador(registrador, *output, mem[*count].rt, null, 0);
       break;
     case 2:
-      (*count)=mem[*count].addr*2-1;
+      (*count)=mem[*count].addr-1;
       break;
     case 8:
       DadosRegistrador(registrador, *null, mem[*count].rs, valor, 1);
       DadosRegistrador(registrador, *null, mem[*count].rt, valor1, 1);
       if(*valor1==*valor){
-         (*count)=(*count)+mem[*count].imm*2-1;
+         (*count)=(*count)+mem[*count].imm-1;
       }
       break;
     case 11:
