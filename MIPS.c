@@ -41,6 +41,8 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
 void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes);
 void vermemoriadados(dados *memoria2);
 void salvarAsm(Memoria *mem, int *n_instrucoes);
+void salvarDados(dados *memoria2);
+void carregarDados(dados *memoria2);
 
 int main(){
   back *reserva=malloc(sizeof(back));
@@ -63,7 +65,7 @@ int main(){
     nome[strlen(nome)-1] = '\0';
   }
   carregarMemoria(nome, mem, count, n_instrucoes);
-  while(k!=9){
+  while(k!=11){
     printf("\n\nPC[%i]", *count);
     printf("\n================================\n");
     printf("             MENU\n");
@@ -76,7 +78,9 @@ int main(){
     printf("6 - Ver todas as instruções\n");
     printf("7 - Ver memória de dados\n");
     printf("8 - Salvar .asm\n");
-    printf("9 - Sair\n");
+    printf("9 - Salvar .dat\n");
+    printf("10 - Carregar .dat\n");
+    printf("11 - Sair\n");
     printf("================================\n");
     printf("Selecione: ");
     scanf("%i",&k);
@@ -91,7 +95,7 @@ int main(){
       case 2:
         if(*count<=*n_instrucoes){
         UC(mem, count, registrador,memoria2, reserva);
-        (*count)++;  
+        (*count)++;
         }
         else{
           printf("Todas as instruções foram executadas");
@@ -99,8 +103,8 @@ int main(){
         break;
       case 3:
         fback(memoria2, registrador, reserva, 1);
-        (*count)--; 
-        break; 
+        (*count)--;
+        break;
       case 4:
         verReg(registrador);
         break;
@@ -117,6 +121,12 @@ int main(){
         salvarAsm(mem, n_instrucoes);
         break;
       case 9:
+        salvarDados(memoria2);
+        break;
+      case 10:
+        carregarDados(memoria2);
+        break;
+      case 11:
         printf("Programa finalizado\n");
         break;
       default:
@@ -174,7 +184,7 @@ void decodificarOpcode(Memoria *mem, int *count) {
     case 11:
       tipo_I(mem, count);
       break;
-    case 15: 
+    case 15:
       tipo_I(mem, count);
       break;
     case 8:
@@ -210,9 +220,9 @@ void tipo_R(Memoria *mem, int *count){
 
   for(int i=0;i<3;i++){
     rs[i]=mem[*count].instrucao[i+4];
-    rt[i]=mem[*count].instrucao[i+7]; 
+    rt[i]=mem[*count].instrucao[i+7];
     rd[i]=mem[*count].instrucao[i+10];
-    funct[i]=mem[*count].instrucao[i+13]; 
+    funct[i]=mem[*count].instrucao[i+13];
   }
   rs[3] = '\0';
   rt[3] = '\0';
@@ -228,7 +238,7 @@ void tipo_I(Memoria *mem, int *count){
   char rs[4],rt[4],imm[7];
   for(int i=0;i<3;i++){
     rs[i]=mem[*count].instrucao[i+4];
-    rt[i]=mem[*count].instrucao[i+7]; 
+    rt[i]=mem[*count].instrucao[i+7];
   }
   rs[3] = '\0';
   rt[3] = '\0';
@@ -243,8 +253,8 @@ void tipo_I(Memoria *mem, int *count){
 }
 
 void tipo_J(Memoria *mem, int *count){
-  char addr[8];    
-  for(int i=0;i<7;i++){ 
+  char addr[8];
+  for(int i=0;i<7;i++){
     addr[i]=mem[*count].instrucao[i+9];
   }
   addr[7]='\0';
@@ -350,6 +360,32 @@ void vermemoriadados(dados *memoria2){
   for(int i=0;i<256;i++){
     printf("[%d]: %i\t", i, memoria2->memoria_dados[i]);
   }
+}
+void salvarDados(dados *memoria2) {
+    FILE *arquivo;
+    arquivo = fopen("dados.dat", "w");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para salvar.\n");
+        return;
+    }
+    for (int i = 0; i < 256; i++) {
+          fprintf(arquivo, "%d\n", memoria2->memoria_dados[i]);
+    }
+    fclose(arquivo);
+    printf("Dados salvos com sucesso no arquivo dados.dat.\n");
+}
+void carregarDados(dados *memoria2) {
+    FILE *arquivo;
+    arquivo = fopen("dados.dat", "r");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para carregar.\n");
+        return;
+    }
+    for (int i = 0; i < 256; i++) {
+       fscanf(arquivo, "%d\n", &memoria2->memoria_dados[i]); // Correção aqui
+    }
+    fclose(arquivo);
+    printf("Dados carregados com sucesso do arquivo dados.dat.\n");
 }
 
 void fback(dados *memoria2 , int *registrador, back *reserva, int chose){
