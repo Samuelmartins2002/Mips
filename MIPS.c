@@ -56,9 +56,7 @@ int main(){
   *count = 0;
   *n_instrucoes = 0;
   inicializarMemoriaDados(memoria2);
-  int q=0;
-  char *nome=
-  malloc(sizeof(char)*51);
+  char *nome=malloc(sizeof(char)*51);
   printf("Qual o nome do arquivo de instruções? ");
   fgets(nome, 51, stdin);
   if (nome[strlen(nome)-1] == '\n'){
@@ -334,22 +332,6 @@ void iniciarReg(int *registrador){
   }
 }
 
-void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes){
-  int *count1=malloc(sizeof(int));
-  *count1=0;
-  if(chose==0){
-  printf("\nInstrução [%i]: %s", *count, mem[*count].instrucao);
-  }
-  else{
-    if(*count<*n_instrucoes){
-    printf("\nInstrução [%i]: %s", *count, mem[*count].instrucao);
-    *count1=*count+1;
-    verinstrucoes(mem, count1 ,1, n_instrucoes);
-    }
-  }
-  free(count1);
-}
-
 void inicializarMemoriaDados(dados *memoria2){
     for (int i = 0; i < 256; i++) {
         memoria2->memoria_dados[i] = 0;
@@ -404,7 +386,7 @@ void fback(dados *memoria2 , int *registrador, back *reserva, int chose){
 }
 void salvarAsm(Memoria *mem, int *n_instrucoes){
 
-  FILE *arquivoEntrada, *arquivoSaida;
+  FILE *arquivoSaida;
   arquivoSaida = fopen("instrucoes.asm", "w");
 
   if (arquivoSaida == NULL){
@@ -434,7 +416,7 @@ void salvarAsm(Memoria *mem, int *n_instrucoes){
                 }
             break;
             case 4:
-                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rs, mem[i].rt, mem[i].imm);
+                fprintf(arquivoSaida, "addi $%d, $%d, %d\n", mem[i].rt, mem[i].rs, mem[i].imm);
             break;
             case 11:
                 fprintf(arquivoSaida, "lw $%d, %d($%d)\n", mem[i].rt, mem[i].imm, mem[i].rs);
@@ -454,3 +436,97 @@ void salvarAsm(Memoria *mem, int *n_instrucoes){
   }
   fclose(arquivoSaida);
 }
+
+void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes){
+  int *count1=malloc(sizeof(int));
+  *count1=0;
+  if(chose==0){
+  printf("\nInstrução [%i]: %s\n", *count, mem[*count].instrucao);
+   switch (mem[*count].opcode){
+            case 0:
+                switch(mem[*count].funct){
+                  case add:
+                    printf("add $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  case sub:
+                    printf("sub $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  case or:
+                    printf("or $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  case and:
+                    printf("and $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  default:
+                    printf("instrucaoinvalida");
+                  break;
+                }
+            break;
+            case 4:
+                printf("addi $t%d, $t%d, %d\n", mem[*count].rt, mem[*count].rs, mem[*count].imm);
+            break;
+            case 11:
+                printf("lw $t%d, %d($t%d)\n", mem[*count].rt, mem[*count].imm, mem[*count].rs);
+                break;
+            case 15:
+                printf("sw $t%d, %d($t%d)\n", mem[*count].rt, mem[*count].imm, mem[*count].rs);
+                break;
+            case 8:
+                printf("beq $t%d, $t%d, %d\n", mem[*count].rt, mem[*count].rs, mem[*count].imm);
+                break;
+            case 2:
+                printf("j %d\n", mem[*count].addr);
+                break;
+            default:
+                break;
+    }
+  }
+  else{
+    if(*count<*n_instrucoes){
+    printf("\nInstrução [%i]: %s\n", *count, mem[*count].instrucao);
+    switch (mem[*count].opcode){
+            case 0:
+                switch(mem[*count].funct){
+                  case add:
+                    printf("add $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  case sub:
+                    printf("sub $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  case or:
+                    printf("or $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  case and:
+                    printf("and $t%d, $t%d, $t%d\n", mem[*count].rd, mem[*count].rs, mem[*count].rt);
+                  break;
+                  default:
+                    printf("instrucaoinvalida");
+                  break;
+                }
+            break;
+            case 4:
+                printf("addi $t%d, $t%d, %d\n", mem[*count].rt, mem[*count].rs, mem[*count].imm);
+            break;
+            case 11:
+                printf("lw $t%d, %d($t%d)\n", mem[*count].rt, mem[*count].imm, mem[*count].rs);
+                break;
+            case 15:
+                printf("sw $t%d, %d($t%d)\n", mem[*count].rt, mem[*count].imm, mem[*count].rs);
+                break;
+            case 8:
+                printf("beq $t%d, $t%d, %d\n", mem[*count].rt, mem[*count].rs, mem[*count].imm);
+                break;
+            case 2:
+                printf("j %d\n", mem[*count].addr);
+                break;
+            default:
+                break;
+    
+  }
+    *count1=*count+1;
+    verinstrucoes(mem, count1 ,1, n_instrucoes);
+    }
+	free(count1);
+}
+}
+
