@@ -23,9 +23,10 @@ typedef struct{
 typedef struct{
   dados memoria_dados;
   int registradores[8];
+  int pc;
 }back;
 
-void fback(dados *memoria2 , int *registrador, back *reserva,int chose);
+void fback(dados *memoria2 , int *registrador, back *reserva,int chose, int *count);
 void inicializarMemoriaDados(dados *memoria2);
 void iniciarReg(int *registrador);
 void verReg(int *registrador);
@@ -100,7 +101,7 @@ int main(){
         }
         break;
       case 3:
-        fback(memoria2, registrador, reserva, 1);
+        fback(memoria2, registrador, reserva, 1, count);
         (*count)--;
         break;
       case 4:
@@ -271,7 +272,7 @@ void DadosRegistrador(int *registradores, int dados, int end, int *output, int c
 }
 
 void UC(Memoria *mem, int *count, int *registrador, dados *m2, back *reserva){
-   fback(m2, registrador, reserva, 0);
+   fback(m2, registrador, reserva, 0, count);
   int k=mem[*count].opcode;
   int *null=malloc(sizeof(int));
   int *valor=malloc(sizeof(int));
@@ -370,14 +371,16 @@ void carregarDados(dados *memoria2) {
     printf("Dados carregados com sucesso do arquivo dados.dat.\n");
 }
 
-void fback(dados *memoria2 , int *registrador, back *reserva, int chose){
+void fback(dados *memoria2 , int *registrador, back *reserva, int chose, int *count){
   if(chose == 0 ){
     reserva->memoria_dados=*memoria2;
     for(int i=0;i<8;i++){
       reserva->registradores[i]=registrador[i];
     }
+    reserva->pc=*count;
   }
   else{
+	 *count=reserva->pc+1;
     *memoria2=reserva->memoria_dados;
     for(int i=0;i<8;i++){
       registrador[i]=reserva->registradores[i];
