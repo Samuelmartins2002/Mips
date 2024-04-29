@@ -200,16 +200,36 @@ void ula(int funct, int valor, int valor1, int *output, int *count){
   enum comando n=funct;
   switch(n){
     case add:
-      *output=valor+valor1;
+    if(valor + valor1 > 255 || valor + valor1 < -128){
+      printf("Estouro de bits no add.\n");
+      *output=0;
+    }else{
+      *output=valor + valor1;
+    }
       break;
     case sub:
-      *output=valor-valor1;
+    if(valor - valor1 > 255 || valor - valor1 < -128){
+      printf("Estouro de bits na sub.\n");
+      *output=0;
+    }else{
+      *output=valor - valor1;
+    }
       break;
     case and:
+    if((valor & valor1) > 255 || (valor & valor1) < -128){
+      printf("Estouro de bits na sub.\n");
+      *output=0;
+    }else{
       *output=valor & valor1;
+    }
       break;
     case or:
-      *output= valor | valor1;
+    if((valor | valor1) > 255 || (valor | valor1) < -128){
+      printf("Estouro de bits na sub.\n");
+      *output=0;
+    }else{
+      *output=valor | valor1;
+    }
       break;
     }
   }
@@ -524,7 +544,7 @@ void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes){
                 break;
             default:
                 break;
-    
+
   }
     *count1=*count+1;
     verinstrucoes(mem, count1 ,1, n_instrucoes);
@@ -532,4 +552,3 @@ void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes){
 	free(count1);
 }
 }
-
