@@ -36,6 +36,8 @@ void tipo_I(Memoria *mem, int *count);
 void tipo_J(Memoria *mem, int *count);
 void dec_bi(char *output, int k, int *count);
 int bi_dec(char *mem);
+int converter_imm(char *imm);
+void inverter_bits(char *imm);
 void carregarMemoria(char *nomeArquivo, Memoria *mem, int *count, int *n_instrucoes);
 void decodificarOpcode(Memoria *mem, int *count);
 void DadosRegistrador(int *registradores, int dados, int end, int *output, int chose);
@@ -172,6 +174,30 @@ int bi_dec(char *mem){
   return(deci);
 }
 
+void inverter_bits(char *imm){
+  int length = strlen(imm);
+  for(int i=0;i<length;i++){
+    if(imm[i] == '0'){
+      imm[i] = '1';
+    } else if (imm[i] == '1') {
+      imm[i] = '0';
+    }
+  }
+}
+
+int converter_imm(char *imm){
+  int deci = 0;
+
+  if(imm[0] == '1'){
+    inverter_bits(imm);
+    deci = bi_dec(imm) + 1;
+    deci = -deci;
+  } else {
+    deci = bi_dec(imm);
+  }
+  return deci;
+}
+
 void decodificarOpcode(Memoria *mem, int *count) {
   switch(mem[*count].opcode){
     case 0:
@@ -268,7 +294,7 @@ void tipo_I(Memoria *mem, int *count){
   }
   mem[*count].rs=bi_dec(rs);
   mem[*count].rt=bi_dec(rt);
-  mem[*count].imm=bi_dec(imm);
+  mem[*count].imm=converter_imm(imm);
 }
 
 void tipo_J(Memoria *mem, int *count){
@@ -400,7 +426,7 @@ void fback(dados *memoria2 , int *registrador, back *reserva, int chose, int *co
     reserva->pc=*count;
   }
   else{
-	 *count=reserva->pc+1;
+   *count=reserva->pc+1;
     *memoria2=reserva->memoria_dados;
     for(int i=0;i<8;i++){
       registrador[i]=reserva->registradores[i];
@@ -549,6 +575,6 @@ void verinstrucoes(Memoria *mem, int *count, int chose, int *n_instrucoes){
     *count1=*count+1;
     verinstrucoes(mem, count1 ,1, n_instrucoes);
     }
-	free(count1);
+  free(count1);
 }
 }
