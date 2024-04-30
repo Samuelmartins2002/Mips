@@ -200,33 +200,33 @@ void ula(int funct, int valor, int valor1, int *output, int *count){
   enum comando n=funct;
   switch(n){
     case add:
-    if(valor + valor1 > 255 || valor + valor1 < -128){
+    if(valor + valor1 > 127 || valor + valor1 < -128){
       printf("Estouro de bits no add.\n");
-      *output=0;
+      *output=valor + valor1;
     }else{
       *output=valor + valor1;
     }
       break;
     case sub:
-    if(valor - valor1 > 255 || valor - valor1 < -128){
+    if(valor - valor1 > 127 || valor - valor1 < -128){
       printf("Estouro de bits na sub.\n");
-      *output=0;
+      *output=valor - valor1;
     }else{
       *output=valor - valor1;
     }
       break;
     case and:
-    if((valor & valor1) > 255 || (valor & valor1) < -128){
+    if((valor & valor1) > 127 || (valor & valor1) < -128){
       printf("Estouro de bits na sub.\n");
-      *output=0;
+      *output=valor & valor1;
     }else{
       *output=valor & valor1;
     }
       break;
     case or:
-    if((valor | valor1) > 255 || (valor | valor1) < -128){
+    if((valor | valor1) > 127 || (valor | valor1) < -128){
       printf("Estouro de bits na sub.\n");
-      *output=0;
+      *output=valor | valor1;
     }else{
       *output=valor | valor1;
     }
